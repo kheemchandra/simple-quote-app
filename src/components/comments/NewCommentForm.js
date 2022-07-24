@@ -8,9 +8,10 @@ const NewCommentForm = (props) => {
   const submitFormHandler = (event) => {
     event.preventDefault();
 
-    // optional: Could validate here
+    let comment = commentTextRef.current.value.trim();
+    if(!comment)return;
 
-    // send comment to server
+    props.onComment(comment);
   };
 
   return (
