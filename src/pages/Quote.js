@@ -1,13 +1,14 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import HighlightedQuote from '../components/quotes/HighlightedQuote';
 import QuoteComments from './QuoteComments';
 import Spinner from "../components/UI/Spinner";
-
+import { useSpinner } from '../hooks/use-Spinner';
 
 const Quote = (props) => {
-  const [spinning, setSpinning] = useState(true);
+  const { spinning, toggleSpinner } = useSpinner(true); 
+
   const { id:quoteID } = useParams();
 
   const quote = props.quotes.find( q => q.id === quoteID)
@@ -19,10 +20,10 @@ const Quote = (props) => {
     <QuoteComments />
   </Fragment>;
   } 
-
-  setTimeout(() => {
-    setSpinning(false);
-  }, 350);
+ 
+  useEffect(() => {
+    toggleSpinner();
+  }, [toggleSpinner]);
 
   return <Fragment>
     {spinning && <Spinner />}

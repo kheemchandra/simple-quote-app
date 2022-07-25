@@ -19,8 +19,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [hideSpinner, setHideSpinner] = useState(false);
 
-  // console.log('quotes are ', quotes)
-  // console.log('QUOTES are ', QUOTES)
+
   const addQuoteHandler = (quote) => {
     QUOTES.unshift({
       id: Math.random().toString(),

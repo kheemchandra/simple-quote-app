@@ -6,6 +6,8 @@ import NewCommentForm from './NewCommentForm';
 import CommentList from './CommentsList';
 import Spinner from '../UI/Spinner';
 
+import { useSpinner } from '../../hooks/use-Spinner';
+
 const COMMENTS = {
   q1: [
     {id: 'q1_cmt_1', text: 'Hi there'},
@@ -18,10 +20,13 @@ const COMMENTS = {
 };
 
 const Comments = () => {
-  const [spinning1, setSpinning1] = useState(false);
-  const [spinning2, setSpinning2] = useState(false);
+  const { spinning:spinning1, setSpinning:setSpinning1, toggleSpinner:toggleSpinner1 } = useSpinner(false);
+  const { spinning:spinning2, setSpinning:setSpinning2, toggleSpinner:toggleSpinner2 } = useSpinner(false);
+  
   const [isAddingComment, setIsAddingComment] = useState(false);
+  
   const { id:quoteID } = useParams();
+  
   const [comments, setComments] = useState(structuredClone(COMMENTS[quoteID]) || []);
 
 
@@ -37,11 +42,12 @@ const Comments = () => {
       id: `${quoteID}_cmt_${Math.random()}`,
       text: comment
     });
-    setSpinning2(true);
-    setTimeout(() => {
-      setSpinning2(false);       
+    const cb = () => {
       setComments(structuredClone(COMMENTS[quoteID]));
-    }, 350)
+    };
+
+    setSpinning2(true);
+    toggleSpinner2(null, cb); 
   };
 
   let content = <p style={{margin: '2.5rem 0'}}>No comments were added yet!</p>;
@@ -49,14 +55,12 @@ const Comments = () => {
     content = <CommentList comments={comments} />;
   }
 
-  useEffect(() => {
+  useEffect(() => { 
     if(!spinning2){ 
       setSpinning1(true);
-      setTimeout(() => {
-        setSpinning1(false);
-      }, 350);
+      toggleSpinner1(); 
     }
-  }, [spinning2]);
+  }, [spinning2, setSpinning1, toggleSpinner1]);
  
   return (
     <section className={classes.comments}>
