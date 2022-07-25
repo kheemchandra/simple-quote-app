@@ -32,7 +32,7 @@ function App() {
     setTimeout(() => {
       setIsLoading(false);
       setHideSpinner(true);
-    }, 2500);
+    }, 350);
   };
 
   const spinnerHandler = () => {

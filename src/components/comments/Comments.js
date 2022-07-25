@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import classes from './Comments.module.css';
 import NewCommentForm from './NewCommentForm';
 import CommentList from './CommentsList';
+import Spinner from '../UI/Spinner';
 
 const COMMENTS = {
   q1: [
@@ -17,9 +18,12 @@ const COMMENTS = {
 };
 
 const Comments = () => {
+  const [spinning1, setSpinning1] = useState(false);
+  const [spinning2, setSpinning2] = useState(false);
   const [isAddingComment, setIsAddingComment] = useState(false);
   const { id:quoteID } = useParams();
   const [comments, setComments] = useState(structuredClone(COMMENTS[quoteID]) || []);
+
 
   const startAddCommentHandler = () => {
     setIsAddingComment(true);
@@ -33,20 +37,39 @@ const Comments = () => {
       id: `${quoteID}_cmt_${Math.random()}`,
       text: comment
     });
-    setComments(structuredClone(COMMENTS[quoteID]));
+    setSpinning2(true);
+    setTimeout(() => {
+      setSpinning2(false);       
+      setComments(structuredClone(COMMENTS[quoteID]));
+    }, 350)
   };
 
+  let content = <p style={{margin: '2.5rem 0'}}>No comments were added yet!</p>;
+  if(comments.length){
+    content = <CommentList comments={comments} />;
+  }
+
+  useEffect(() => {
+    if(!spinning2){ 
+      setSpinning1(true);
+      setTimeout(() => {
+        setSpinning1(false);
+      }, 350);
+    }
+  }, [spinning2]);
+ 
   return (
     <section className={classes.comments}>
       <h2>User Comments</h2>
+      { spinning2 && <Spinner /> }
       {!isAddingComment && (
         <button className='btn' onClick={startAddCommentHandler}>
           Add a Comment
         </button>
       )}
       {isAddingComment && <NewCommentForm onComment={newCommmentHandler}/>}
-      { (comments.length === 0) && <p>No comments were added yet!</p>}
-      { (comments.length !== 0) && <CommentList comments={comments} />}
+      { spinning1 && <Spinner/> }
+      { !spinning1 && content }
     </section>
   );
 };

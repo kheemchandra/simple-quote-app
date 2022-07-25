@@ -2,17 +2,18 @@ import { useRef } from 'react';
 
 import classes from './NewCommentForm.module.css';
 
-const NewCommentForm = (props) => {
+const NewCommentForm = (props) => { 
   const commentTextRef = useRef();
 
   const submitFormHandler = (event) => {
     event.preventDefault();
 
     let comment = commentTextRef.current.value.trim();
-    if(!comment)return;
-
+    if(!comment)return; 
     props.onComment(comment);
   };
+
+  
 
   return (
     <form className={classes.form} onSubmit={submitFormHandler}>
