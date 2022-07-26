@@ -5,7 +5,7 @@ import classes from './QuoteList.module.css';
 
 let ascending = false;
 
-const QuoteList = (props) => {
+const QuoteList = (props) => { 
   const [ quotes, setQuotes ] = useState(props.quotes); 
 
   const sortHandler = () => {
@@ -27,7 +27,7 @@ const QuoteList = (props) => {
     });
     if(ascending){
       q.reverse()
-    } 
+    }  
     ascending = !ascending; 
     setQuotes(q);
   }

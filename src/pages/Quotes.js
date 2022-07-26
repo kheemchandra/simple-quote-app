@@ -1,28 +1,55 @@
-import { Fragment, useEffect } from "react";
+import { useState, useEffect } from "react";
+import { Switch, Route } from "react-router-dom";
 
 import QuoteList from "../components/quotes/QuoteList";
 import NoQuotesFound from "../components/quotes/NoQuotesFound";
 import Spinner from "../components/UI/Spinner";
-import { useSpinner } from "../hooks/use-Spinner";
-// const QUOTES = [];
+import Quote from "./Quote";
 
-const Quotes = (props) => { 
-  const { spinning, toggleSpinner } = useSpinner(true); 
+const Quotes = () => {
+  const [spinning, setSpinning] = useState(true);
+  const [quotes, setQuotes] = useState([]);
+  const [noQuotes, setNoQuotes] = useState(false);
 
-  let content = <NoQuotesFound />;
+  let content = <QuoteList quotes={quotes} />;
 
-  if(props.quotes.length){
-    content = <QuoteList quotes={props.quotes} />
+  if (noQuotes) {
+    content = <NoQuotesFound />;
   }
- 
-  useEffect(() => {
-    toggleSpinner();
-  }, [toggleSpinner]);
 
-  return <Fragment>
-    {spinning && <Spinner />}
-    {!spinning && content}
-  </Fragment>
+  useEffect(() => {
+    const fetchQuotes = async () => {
+      const response = await fetch(
+        "https://films-fetch-default-rtdb.firebaseio.com/quotes.json"
+      );
+      const data = await response.json();
+      const quotesArr = [];
+      for (const id in data) {
+        quotesArr.unshift({
+          id,
+          ...data[id],
+        });
+      }
+      setQuotes(quotesArr);
+      if (quotesArr.length === 0) {
+        setNoQuotes(true);
+      }
+      setSpinning(false);
+    };
+    fetchQuotes(); 
+  }, []);
+
+  return (
+    <Switch>
+      <Route path="/quotes" exact>
+        {spinning && <Spinner />}
+        {!spinning && content}
+      </Route>
+      <Route path="/quotes/:id/detail">
+        <Quote quotes={quotes} />
+      </Route>
+    </Switch>
+  );
 };
 
 export default Quotes;

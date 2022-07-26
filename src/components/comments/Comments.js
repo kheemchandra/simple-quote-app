@@ -1,80 +1,73 @@
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState, useEffect, Fragment, useCallback } from "react";
+import { useParams  } from "react-router-dom";
 
-import classes from './Comments.module.css';
-import NewCommentForm from './NewCommentForm';
-import CommentList from './CommentsList';
-import Spinner from '../UI/Spinner';
-
-import { useSpinner } from '../../hooks/use-Spinner';
-
-const COMMENTS = {
-  q1: [
-    {id: 'q1_cmt_1', text: 'Hi there'},
-    {id: 'q1_cmt_2', text: 'It is rainy season.'},
-  ],
-  q2: [
-    {id: 'q2_cmt_1', text: 'Hello how are you?'},
-    {id: 'q2_cmt_2', text: 'Learning react nowadays'},
-  ],  
-};
+import classes from "./Comments.module.css";
+import NewCommentForm from "./NewCommentForm";
+import CommentsList from "./CommentsList";
+import Spinner from "../UI/Spinner"; 
 
 const Comments = () => {
-  const { spinning:spinning1, setSpinning:setSpinning1, toggleSpinner:toggleSpinner1 } = useSpinner(false);
-  const { spinning:spinning2, setSpinning:setSpinning2, toggleSpinner:toggleSpinner2 } = useSpinner(false);
-  
+  const [spinning, setSpinning] = useState(); 
+  const [submitted, setSubmitted] = useState(false);
   const [isAddingComment, setIsAddingComment] = useState(false);
-  
-  const { id:quoteID } = useParams();
-  
-  const [comments, setComments] = useState(structuredClone(COMMENTS[quoteID]) || []);
 
+  const { id: quoteID } = useParams();
+
+  const [comments, setComments] = useState([]);
 
   const startAddCommentHandler = () => {
     setIsAddingComment(true);
   };
-  
-  const newCommmentHandler =  (comment) => {
-    if(!COMMENTS[quoteID]){
-      COMMENTS[quoteID] = [];
-    }
-    COMMENTS[quoteID].unshift({
-      id: `${quoteID}_cmt_${Math.random()}`,
-      text: comment
-    });
-    const cb = () => {
-      setComments(structuredClone(COMMENTS[quoteID]));
-    };
 
-    setSpinning2(true);
-    toggleSpinner2(null, cb); 
+  const commentHandler = () => {
+    setSubmitted(true);
   };
 
-  let content = <p style={{margin: '2.5rem 0'}}>No comments were added yet!</p>;
-  if(comments.length){
-    content = <CommentList comments={comments} />;
+  let content = (
+    <p style={{ margin: "2.5rem 0" }}>No comments were added yet!</p>
+  );
+  if (comments.length) {
+    content = <CommentsList comments={comments} />;
   }
 
-  useEffect(() => { 
-    if(!spinning2){ 
-      setSpinning1(true);
-      toggleSpinner1(); 
+  const fetchComments = useCallback(async () => {
+    setSpinning(true);
+    const response = await fetch(`https://films-fetch-default-rtdb.firebaseio.com/comments/${quoteID}.json/`);
+    const data = await response.json(); 
+    const fetchedCommentsArr = [];
+    for(const id in data){
+      const cmtId = quoteID+' '+id;
+      const comment = {id: cmtId, text: data[id].text};
+      fetchedCommentsArr.unshift(comment);
     }
-  }, [spinning2, setSpinning1, toggleSpinner1]);
- 
+    setComments(fetchedCommentsArr);
+    setSpinning(false);
+  }, [quoteID]);
+
+  useEffect(() => {
+    if(submitted){
+      fetchComments();
+      setSubmitted(false);
+    }
+  }, [submitted, fetchComments]);
+
+  useEffect(() => {
+    fetchComments();
+  }, [fetchComments]);
+
   return (
+    <Fragment> 
     <section className={classes.comments}>
-      <h2>User Comments</h2>
-      { spinning2 && <Spinner /> }
+      <h2>User Comments</h2> 
       {!isAddingComment && (
-        <button className='btn' onClick={startAddCommentHandler}>
+        <button className="btn" onClick={startAddCommentHandler}>
           Add a Comment
         </button>
       )}
-      {isAddingComment && <NewCommentForm onComment={newCommmentHandler}/>}
-      { spinning1 && <Spinner/> }
-      { !spinning1 && content }
-    </section>
+      {isAddingComment && <NewCommentForm quoteID={quoteID} onComment={commentHandler}/>}
+      {spinning && <Spinner />}
+      {!spinning && content}
+    </section></Fragment>
   );
 };
 

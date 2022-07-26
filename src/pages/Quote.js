@@ -13,7 +13,7 @@ const Quote = (props) => {
 
   const quote = props.quotes.find( q => q.id === quoteID)
 
-  let content = <h1>Error 404</h1>
+  let content = <h1 style={{textAlign: 'center'}}>Error 404</h1>
   if(quote){
     content = <Fragment>
     <HighlightedQuote author={quote.author} text={quote.text}/>

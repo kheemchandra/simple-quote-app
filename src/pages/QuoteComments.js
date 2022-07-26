@@ -13,7 +13,7 @@ const QuoteComments = (props) => {
           <Link 
             to={`/quotes/${quoteID}/detail/comments`}
           >
-            <button style={{}} className="btn--flat">
+            <button className="btn--flat">
               Load Comments
             </button>
           </Link>

@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'; 
+import { useRef } from 'react'; 
 
 import Card from '../UI/Card';
 import LoadingSpinner from '../UI/LoadingSpinner';
@@ -7,9 +7,7 @@ import classes from './QuoteForm.module.css';
 const QuoteForm = (props) => { 
   const authorInputRef = useRef();
   const textInputRef = useRef();
-
-  const { isLoading, hideSpinner, onObserve } = props;
-
+ 
   function submitFormHandler(event) {
     event.preventDefault(); 
     const enteredAuthor = authorInputRef.current.value;
@@ -19,12 +17,6 @@ const QuoteForm = (props) => {
 
     props.onAddQuote({ author: enteredAuthor, text: enteredText });
   }
-
-  useEffect(() => { 
-    if(!isLoading && hideSpinner){ 
-      onObserve();
-    }
-  }, [isLoading, hideSpinner, onObserve]);
 
   return (
     <Card>
