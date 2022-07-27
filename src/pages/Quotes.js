@@ -1,28 +1,30 @@
 import { useState, useEffect } from "react";
 import { Switch, Route } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 
 import QuoteList from "../components/quotes/QuoteList";
 import NoQuotesFound from "../components/quotes/NoQuotesFound";
 import Spinner from "../components/UI/Spinner";
 import Quote from "./Quote";
 
+import { fetchData } from "../store/actions";
+import { quoteActions } from "../store/quotesSlice";
+
+const URL = "https://films-fetch-default-rtdb.firebaseio.com/quotes.json";
+
 const Quotes = () => {
+  const dispatch = useDispatch();
   const [spinning, setSpinning] = useState(true);
-  const [quotes, setQuotes] = useState([]);
-  const [noQuotes, setNoQuotes] = useState(false);
+  const quotes = useSelector((store) => store.quotes.quotes); 
 
   let content = <QuoteList quotes={quotes} />;
 
-  if (noQuotes) {
+  if (quotes.length === 0) {
     content = <NoQuotesFound />;
   }
 
   useEffect(() => {
-    const fetchQuotes = async () => {
-      const response = await fetch(
-        "https://films-fetch-default-rtdb.firebaseio.com/quotes.json"
-      );
-      const data = await response.json();
+    const applyData = (data) => { 
       const quotesArr = [];
       for (const id in data) {
         quotesArr.unshift({
@@ -30,14 +32,16 @@ const Quotes = () => {
           ...data[id],
         });
       }
-      setQuotes(quotesArr);
-      if (quotesArr.length === 0) {
-        setNoQuotes(true);
-      }
-      setSpinning(false);
+      dispatch(quoteActions.updateQuotes(quotesArr));
     };
-    fetchQuotes(); 
-  }, []);
+
+    const cbs = {
+      afterCB: () => {
+        setSpinning(false);
+      }
+    }
+    dispatch(fetchData({ URL, applyData }, cbs)); 
+  }, [dispatch]);
 
   return (
     <Switch>
